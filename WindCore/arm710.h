@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <optional>
 #include <variant>
+#include <functional>
 
 using namespace std;
 
