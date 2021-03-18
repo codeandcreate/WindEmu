@@ -1113,7 +1113,7 @@ void ARM710::reportFault(MMUFault fault) {
 
 
 void ARM710::log(const char *format, ...) {
-  /*if (logger) {
+  if (logger) {
 		char buffer[1024];
 
 		va_list vaList;
@@ -1122,7 +1122,7 @@ void ARM710::log(const char *format, ...) {
 		va_end(vaList);
 
 		logger(buffer);
-		}*/
+		}
 }
 
 void ARM710::logPcHistory() {
