@@ -16,6 +16,10 @@ public:
 
     Q_INVOKABLE void menuButtonPressed();
     Q_INVOKABLE void menuButtonReleased();
+    Q_INVOKABLE void saveButtonPressed();
+    Q_INVOKABLE void digitizerDown(QPointF pos);
+    Q_INVOKABLE void digitizerUp(QPointF pos);
+    Q_INVOKABLE void digitizerPos(QPointF pos);
 
 
 public slots:

@@ -11,21 +11,44 @@ Window {
     height: 1872;
 
     Rectangle {
+        id: digitizer;
         rotation: 90;
         width: 1872;
-        height: 702;
+        height: 882;
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.verticalCenter: parent.verticalCenter;
-        border.color: "black"
-        border.width: 1
+
+        MouseArea {
+            id: lcdMouseArea;
+            anchors.fill: parent;
+            onPositionChanged: {
+                var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
+                console.log("pos ", positionInDigitizer);
+                lcd.digitizerPos(positionInDigitizer);
+            }
+            onPressed: {
+                var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
+                console.log("pressed ", positionInDigitizer);
+                lcd.digitizerDown(positionInDigitizer);
+            }
+            onReleased: {
+                var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
+                console.log("rel ", positionInDigitizer);
+                lcd.digitizerUp(positionInDigitizer);
+            }
+        }
+
+        Image {
+            source: "imgs/cover.png"
+        }
 
         Lcd {
             id: lcd;
-            objectName: "lcd"
-            width: 1872;
-            height: 702;
-            anchors.horizontalCenter: parent.horizontalCenter;
-            anchors.verticalCenter: parent.verticalCenter;
+            objectName: "lcd";
+            y:14;
+            x:122;
+            width: 1723;
+            height: 646;
         }
 
     }
@@ -43,18 +66,15 @@ Window {
 
         Text {
             id: bsc;
-            text: "<font size='+1' face='Noto Emoji'>📶</font>";
+            text: "<font size='+1' face='Noto Emoji'>💾</font>";
             textFormat: Text.RichText;
             anchors {horizontalCenter: parent.horizontalCenter;}
         }
         MouseArea {
             id: bdownMouseArea
             anchors.fill: parent
-            onPressed: {
-                lcd.menuButtonPressed();
-            }
-            onReleased: {
-                lcd.menuButtonReleased();
+            onClicked: {
+                lcd.saveButtonPressed();
             }
         }
     }

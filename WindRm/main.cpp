@@ -85,6 +85,14 @@ int main(int argc, char *argv[])
 	emu->loadROM(romData, buffer.size());
     qDebug() << "ROM loaded";
 
+    QFile stateFile("psion.out");
+	if (stateFile.open(QFile::ReadOnly)) {
+        qDebug() << "State found, loading";
+        emu->restoreState(&stateFile);
+        qDebug() << "State loaded";
+    }
+    stateFile.close();
+
     auto filter = new EventFilter(&app);
     app.setApplicationDisplayName("WindRm");
     app.installEventFilter(filter);

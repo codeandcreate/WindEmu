@@ -1,6 +1,7 @@
 #pragma once
 #include "arm710.h"
 #include <unordered_set>
+#include <QFile>
 
 enum EpocKey {
 	EStdKeyDial = 161,
@@ -128,6 +129,9 @@ public:
 	virtual void readLCDIntoBuffer(uint8_t **lines, bool is32BitOutput) const = 0;
 	virtual void setKeyboardKey(EpocKey key, bool value) = 0;
 	virtual void updateTouchInput(int32_t x, int32_t y, bool down) = 0;
+	virtual void saveState(QFile* outFile) = 0;
+	virtual void restoreState(QFile* inFile) = 0;
+	
 
 #ifndef __EMSCRIPTEN__
 	std::unordered_set<uint32_t> &breakpoints() { return _breakpoints; }

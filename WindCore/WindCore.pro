@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       -= core gui
+QT       -= gui
 QMAKE_MACOSX_DEPLOYMENT_TARGET = 10.14
 
 TARGET = WindCore

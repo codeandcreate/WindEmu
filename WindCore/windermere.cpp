@@ -753,4 +753,54 @@ void Emulator::updateTouchInput(int32_t x, int32_t y, bool down) {
 	touchY = y;
 }
 
+void Emulator::saveState(QFile* outFile) {
+  outFile->write((const char*) &MemoryBlockC0, 0x800000);
+  outFile->write((const char*) &MemoryBlockC1, 0x800000);
+  outFile->write((const char*) &MemoryBlockD0, 0x800000);
+  outFile->write((const char*) &MemoryBlockD1, 0x800000);
+
+  outFile->write((const char*) &pendingInterrupts, sizeof(uint16_t));
+  outFile->write((const char*) &interruptMask, sizeof(uint16_t));
+  outFile->write((const char*) &portValues, sizeof(uint32_t));
+  outFile->write((const char*) &portDirections, sizeof(uint32_t));
+  outFile->write((const char*) &pwrsr, sizeof(uint32_t));
+  outFile->write((const char*) &lcdControl, sizeof(uint32_t));
+  outFile->write((const char*) &lcdAddress, sizeof(uint32_t));
+  outFile->write((const char*) &rtc, sizeof(uint32_t));
+  outFile->write((const char*) &lastSSIRequest, sizeof(uint16_t));
+  outFile->write((const char*) &ssiReadCounter, sizeof(int));
+
+  outFile->write((const char*) &halted, sizeof(bool));
+  outFile->write((const char*) &asleep, sizeof(bool));
+
+  outFile->write((const char*) &passedCycles, sizeof(int64_t));
+  outFile->write((const char*) &nextTickAt, sizeof(int64_t));
+  
+}
+
+void Emulator::restoreState(QFile* inFile) {
+  inFile->read((char*) &MemoryBlockC0, 0x800000);
+  inFile->read((char*) &MemoryBlockC1, 0x800000);
+  inFile->read((char*) &MemoryBlockD0, 0x800000);
+  inFile->read((char*) &MemoryBlockD1, 0x800000);
+
+  inFile->read((char*) &pendingInterrupts, sizeof(uint16_t));
+  inFile->read((char*) &interruptMask, sizeof(uint16_t));
+  inFile->read((char*) &portValues, sizeof(uint32_t));
+  inFile->read((char*) &portDirections, sizeof(uint32_t));
+  inFile->read((char*) &pwrsr, sizeof(uint32_t));
+  inFile->read((char*) &lcdControl, sizeof(uint32_t));
+  inFile->read((char*) &lcdAddress, sizeof(uint32_t));
+  inFile->read((char*) &rtc, sizeof(uint32_t));
+  inFile->read((char*) &lastSSIRequest, sizeof(uint16_t));
+  inFile->read((char*) &ssiReadCounter, sizeof(int));
+
+  inFile->read((char*) &halted, sizeof(bool));
+  inFile->read((char*) &asleep, sizeof(bool));
+
+  inFile->read((char*) &passedCycles, sizeof(int64_t));
+  inFile->read((char*) &nextTickAt, sizeof(int64_t));
+
+}
+
 }

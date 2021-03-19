@@ -4,9 +4,12 @@
 #include <QImage>
 #include<QPixmap>
 #include<QPainter>
+#include<QFile>
 
 #include "../WindCore/decoder.h"
 #include "clps7111.h"
+
+#define SCALE_F 2.691
 
 Lcd::Lcd(QQuickItem *parent) {
 
@@ -39,7 +42,8 @@ void Lcd::paint(QPainter *painter) {
     QRectF target(0.0, 0.0, 640.0, 240.0);
     QRectF source(0.0, 0.0, 640.0, 240.0);
 
-    painter->scale(2.925, 2.925);
+    //painter->scale(2.925, 2.925);
+    painter->scale(SCALE_F, SCALE_F);
     painter->drawPixmap(target, QPixmap::fromImage(std::move(img)), source);
 }
 
@@ -68,6 +72,17 @@ void Lcd::dumpDisassembly() {
     }
 }
 
+void Lcd::saveButtonPressed() {
+    timer->stop();
+    qDebug() << "Saving state to psion.out";
+    QFile f("psion.out");
+	f.open(QFile::WriteOnly);
+    emu->saveState(&f);
+	f.close();
+    qDebug() << "State written.";
+
+}
+
 void Lcd::menuButtonPressed() {
     qDebug() << "menuPressed " << emu->currentCycles();
     emu->setKeyboardKey(EStdKeyMenu, true);
@@ -76,6 +91,19 @@ void Lcd::menuButtonReleased() {
     emu->setKeyboardKey(EStdKeyMenu, false);
 }
 
+void Lcd::digitizerDown(QPointF pos) {
+    qDebug() << "down:" << (int32_t)(pos.x()/SCALE_F) << "," << (int32_t)(pos.y()/SCALE_F);
+    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), true);
+}
+
+void Lcd::digitizerUp(QPointF pos) {
+    qDebug() << "up:" << (int32_t)pos.x() << "," << (int32_t)pos.y();
+    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), false);
+}
+
+void Lcd::digitizerPos(QPointF pos) {
+    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), true);
+}
 
 void Lcd::execTimer() {
     //qDebug() << "execTimer";

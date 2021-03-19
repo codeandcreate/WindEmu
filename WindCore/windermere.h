@@ -77,5 +77,7 @@ public:
 	void readLCDIntoBuffer(uint8_t **lines, bool is32BitOutput) const override;
 	void setKeyboardKey(EpocKey key, bool value) override;
 	void updateTouchInput(int32_t x, int32_t y, bool down) override;
+	void saveState(QFile* outFile) override;
+	void restoreState(QFile* inFile) override;
 };
 }
