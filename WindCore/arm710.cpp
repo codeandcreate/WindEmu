@@ -1,5 +1,6 @@
 #include "arm710.h"
 #include "common.h"
+#include <QDebug>
 
 // this will need changing if this code ever compiles on big-endian procs
 inline uint32_t read32LE(uint8_t *p) {
@@ -70,6 +71,7 @@ void ARM710::requestIRQ() {
 }
 
 void ARM710::reset() {
+	qDebug() << "ARM710::reset";
 #ifdef ARM710T_CACHE
 	clearCache();
 #endif

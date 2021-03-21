@@ -3,6 +3,7 @@
 #include "hardware.h"
 #include <time.h>
 #include "common.h"
+#include <QDebug>
 
 
 //#define INCLUDE_D
@@ -776,6 +777,41 @@ void Emulator::saveState(QFile* outFile) {
   outFile->write((const char*) &passedCycles, sizeof(int64_t));
   outFile->write((const char*) &nextTickAt, sizeof(int64_t));
   
+  // arm710
+  outFile->write((const char*) &bank, sizeof(BankIndex));
+  outFile->write((const char*) &CPSR, sizeof(uint32_t));
+  outFile->write((const char*) &GPRs, sizeof(uint32_t) * 16);
+  outFile->write((const char*) &fiqBankedRegisters, sizeof(uint32_t) * 2 * 5);
+  outFile->write((const char*) &allModesBankedRegisters, sizeof(uint32_t) * 6 * 2);
+  outFile->write((const char*) &SPSRs, sizeof(uint32_t) * 5);
+  outFile->write((const char*) &cp15_id, sizeof(uint32_t));
+  outFile->write((const char*) &cp15_control, sizeof(uint32_t));
+  outFile->write((const char*) &cp15_translationTableBase, sizeof(uint32_t));
+  outFile->write((const char*) &cp15_domainAccessControl, sizeof(uint32_t));
+  outFile->write((const char*) &cp15_faultStatus, sizeof(uint8_t));
+  outFile->write((const char*) &cp15_faultAddress, sizeof(uint32_t));
+  outFile->write((const char*) &isTVersion, sizeof(bool));
+
+  outFile->write((const char*) &singleTlbEntry, sizeof(TlbEntry));
+
+  // Instruction Loop
+  outFile->write((const char*) &prefetchCount, sizeof(int));
+  outFile->write((const char*) &prefetch, sizeof(uint32_t) * 2);
+  outFile->write((const char*) &prefetchFaults, sizeof(MMUFault) * 2);
+
+  outFile->write((const char*) &kScan, sizeof(uint32_t));
+  outFile->write((const char*) &keyboardColumns, sizeof(uint8_t) * 8);
+  outFile->write((const char*) &touchX, sizeof(int32_t));
+  outFile->write((const char*) &touchY, sizeof(int32_t));
+
+  
+  outFile->write((const char*) &etna, sizeof(Etna));
+  outFile->write((const char*) &tc1, sizeof(Timer));
+  outFile->write((const char*) &tc2, sizeof(Timer));
+  outFile->write((const char*) &uart1, sizeof(UART));
+  outFile->write((const char*) &uart2, sizeof(UART));
+
+
 }
 
 void Emulator::restoreState(QFile* inFile) {
@@ -799,7 +835,60 @@ void Emulator::restoreState(QFile* inFile) {
   inFile->read((char*) &asleep, sizeof(bool));
 
   inFile->read((char*) &passedCycles, sizeof(int64_t));
+  qDebug() << "passedCycles: " << passedCycles;
   inFile->read((char*) &nextTickAt, sizeof(int64_t));
+  qDebug() << "nextTickAt: " << nextTickAt;
+// arm710
+  inFile->read(( char*) &bank, sizeof(BankIndex));
+  inFile->read(( char*) &CPSR, sizeof(uint32_t));
+  inFile->read(( char*) &GPRs, sizeof(uint32_t) * 16);
+  inFile->read(( char*) &fiqBankedRegisters, sizeof(uint32_t) * 2 * 5);
+  inFile->read(( char*) &allModesBankedRegisters, sizeof(uint32_t) * 6 * 2);
+  inFile->read(( char*) &SPSRs, sizeof(uint32_t) * 5);
+  inFile->read(( char*) &cp15_id, sizeof(uint32_t));
+  inFile->read(( char*) &cp15_control, sizeof(uint32_t));
+  inFile->read(( char*) &cp15_translationTableBase, sizeof(uint32_t));
+  inFile->read(( char*) &cp15_domainAccessControl, sizeof(uint32_t));
+  inFile->read(( char*) &cp15_faultStatus, sizeof(uint8_t));
+  inFile->read(( char*) &cp15_faultAddress, sizeof(uint32_t));
+  inFile->read(( char*) &isTVersion, sizeof(bool));
+  
+  inFile->read((char*) &singleTlbEntry, sizeof(TlbEntry));
+
+  inFile->read((char*) &prefetchCount, sizeof(int));
+  inFile->read((char*) &prefetch, sizeof(uint32_t) * 2);
+  inFile->read((char*) &prefetchFaults, sizeof(MMUFault) * 2);
+
+  inFile->read((char*) &kScan, sizeof(uint32_t));
+  inFile->read((char*) &keyboardColumns, sizeof(uint8_t) * 8);
+  inFile->read((char*) &touchX, sizeof(int32_t));
+  inFile->read((char*) &touchY, sizeof(int32_t));
+
+  inFile->read((char*) &etna, sizeof(Etna));
+  etna.owner = this;
+  inFile->read((char*) &tc1, sizeof(Timer));
+  inFile->read((char*) &tc2, sizeof(Timer));
+  inFile->read((char*) &uart1, sizeof(UART));
+  inFile->read((char*) &uart2, sizeof(UART));
+  tc1.cpu = this;
+  tc2.cpu = this;
+  uart1.cpu = this;
+  uart2.cpu = this;
+
+  configured = true;
+	srand(1000);
+
+	// uart1.cpu = this;
+	// uart2.cpu = this;
+	// memset(&tc1, 0, sizeof(tc1));
+	// memset(&tc2, 0, sizeof(tc1));
+	// tc1.clockSpeed = CLOCK_SPEED;
+	// tc2.clockSpeed = CLOCK_SPEED;
+
+	// nextTickAt = TICK_INTERVAL;
+	// tc1.nextTickAt = tc1.tickInterval();
+	// tc2.nextTickAt = tc2.tickInterval();
+	// rtc = getRTC();
 
 }
 

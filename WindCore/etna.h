@@ -4,6 +4,7 @@
 class ARM710;
 
 class Etna {
+public:
     uint8_t prom[0x80] = {};
     uint16_t promReadAddress = 0, promReadValue = 0;
     bool promReadActive = false;

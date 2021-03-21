@@ -123,7 +123,7 @@ public:
 public:
 	void log(const char *format, ...);
 	void logPcHistory();
-private:
+protected:
 	std::function<void(const char *)> logger;
 
 	enum { PcHistoryCount = 10 };

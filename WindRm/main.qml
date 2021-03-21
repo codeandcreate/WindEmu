@@ -12,9 +12,8 @@ Window {
 
     Rectangle {
         id: digitizer;
-        rotation: 90;
-        width: 1872;
-        height: 882;
+        width:1391;
+        height:611;
         anchors.horizontalCenter: parent.horizontalCenter;
         anchors.verticalCenter: parent.verticalCenter;
 
@@ -23,17 +22,14 @@ Window {
             anchors.fill: parent;
             onPositionChanged: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                console.log("pos ", positionInDigitizer);
                 lcd.digitizerPos(positionInDigitizer);
             }
             onPressed: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                console.log("pressed ", positionInDigitizer);
                 lcd.digitizerDown(positionInDigitizer);
             }
             onReleased: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                console.log("rel ", positionInDigitizer);
                 lcd.digitizerUp(positionInDigitizer);
             }
         }
@@ -45,12 +41,27 @@ Window {
         Lcd {
             id: lcd;
             objectName: "lcd";
-            y:14;
-            x:122;
-            width: 1723;
-            height: 646;
+            y:12;
+            x:91;
+            width: 1280;
+            height: 480;
         }
 
+
+
+    }
+    Keyboard {
+            id: keyboard;
+            visible: true;
+            function onChar(ch) {
+                console.log(ch);
+                lcd.keyPressEvent(ch.toUpperCase());
+            }
+            function onCharRelease(ch) {
+                console.log("release:" + ch);
+                lcd.keyReleaseEvent(ch.toUpperCase());
+            }
+            anchors.bottom: parent.bottom
     }
 
     Rectangle {

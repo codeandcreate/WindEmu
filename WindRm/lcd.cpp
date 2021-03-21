@@ -5,11 +5,12 @@
 #include<QPixmap>
 #include<QPainter>
 #include<QFile>
+#include <QBitmap>
 
 #include "../WindCore/decoder.h"
 #include "clps7111.h"
 
-#define SCALE_F 2.691
+#define SCALE_F 2
 
 Lcd::Lcd(QQuickItem *parent) {
 
@@ -33,6 +34,11 @@ void Lcd::start(EmuBase* emu) {
 }
 
 void Lcd::paint(QPainter *painter) {
+    #ifdef FRAME_DEBUG
+    QElapsedTimer pt;
+    pt.start();
+    #endif
+
 	uint8_t *lines[1024];
 	QImage img(emu->getLCDWidth(), emu->getLCDHeight(), QImage::Format_Grayscale8);
 	for (int y = 0; y < img.height(); y++)
@@ -42,9 +48,13 @@ void Lcd::paint(QPainter *painter) {
     QRectF target(0.0, 0.0, 640.0, 240.0);
     QRectF source(0.0, 0.0, 640.0, 240.0);
 
-    //painter->scale(2.925, 2.925);
-    painter->scale(SCALE_F, SCALE_F);
+    painter->scale(2, 2);
     painter->drawPixmap(target, QPixmap::fromImage(std::move(img)), source);
+
+
+    #ifdef FRAME_DEBUG
+    qDebug() << "Paint operation took" << pt.elapsed() << "milliseconds";
+    #endif
 }
 
 void Lcd::dumpDisassembly() {
@@ -106,20 +116,77 @@ void Lcd::digitizerPos(QPointF pos) {
 }
 
 void Lcd::execTimer() {
-    //qDebug() << "execTimer";
+    #ifdef FRAME_DEBUG
+    qDebug() << "Inter-exec time:" << frameTimer.elapsed() << "milliseconds";
+    frameTimer.start();
+    #endif
+
 	if (emu) {
+        QElapsedTimer pt;
+        pt.start();
+
 		emu->executeUntil(emu->currentCycles() + (emu->getClockSpeed() / 64));
-		//updateScreen();
-        //qDebug() << QString("Cycles: %1").arg(emu->currentCycles());
-        //dumpDisassembly();
 
-        if (emu->currentCycles() >= 72000008 && emu->currentCycles() <= 73000008) {
-            // splash screen ready
+        frame++;
+        if (pt.nsecsElapsed() < 7000000) {
+          if (frame % 6 == 0) {
             update();
-        }
-
-        if (emu->currentCycles() > 1047744048) {
-            update();
+          }
         }
 	}
+
+    #ifdef FRAME_DEBUG
+    if (pt.nsecsElapsed() > 15625000) {
+        qDebug() << "Exec+draw took" << pt.nsecsElapsed() << "nanoseconds [should be < 15,625,000]";
+    }
+    #endif
+}
+
+static EpocKey resolveKey(int key, int vk) {
+	switch (key) {
+	case Qt::Key_Apostrophe: return EStdKeySingleQuote;
+	case Qt::Key_Backspace: return EStdKeyBackspace;
+	case Qt::Key_Escape: return EStdKeyEscape;
+	case Qt::Key_Enter: return EStdKeyEnter;
+	case Qt::Key_Return: return EStdKeyEnter;
+	case Qt::Key_Alt: return EStdKeyMenu;
+	case Qt::Key_Tab: return EStdKeyTab;
+#ifdef Q_OS_MAC
+	case Qt::Key_Meta: return EStdKeyLeftCtrl;
+#else
+	case Qt::Key_Control: return EStdKeyLeftCtrl;
+#endif
+	case Qt::Key_Down: return EStdKeyDownArrow;
+	case Qt::Key_Period: return EStdKeyFullStop;
+#ifdef Q_OS_MAC
+	case Qt::Key_Control: return EStdKeyLeftFunc;
+#else
+	case Qt::Key_Meta: return EStdKeyLeftFunc;
+#endif
+	case Qt::Key_Shift: return EStdKeyLeftShift;
+	case Qt::Key_Right: return EStdKeyRightArrow;
+	case Qt::Key_Left: return EStdKeyLeftArrow;
+	case Qt::Key_Comma: return EStdKeyComma;
+	case Qt::Key_Up: return EStdKeyUpArrow;
+	case Qt::Key_Space: return EStdKeySpace;
+	}
+
+	if (key >= '0' && key <= '9') return (EpocKey)key;
+	if (key >= 'A' && key <= 'Z') return (EpocKey)key;
+	return EStdKeyNull;
+}
+
+void Lcd::keyPressEvent(QKeyEvent *event)
+{
+	emu->log("KeyPress: QtKey=%d nativeVirtualKey=%x nativeModifiers=%x", event->key(), event->nativeVirtualKey(), event->nativeModifiers());
+	EpocKey k = resolveKey(event->key(), event->nativeVirtualKey());
+	if (k != EStdKeyNull)
+		emu->setKeyboardKey(k, true);
+}
+
+void Lcd::keyReleaseEvent(QKeyEvent *event)
+{
+	EpocKey k = resolveKey(event->key(), event->nativeVirtualKey());
+	if (k != EStdKeyNull)
+		emu->setKeyboardKey(k, false);
 }

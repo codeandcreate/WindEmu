@@ -107,6 +107,7 @@ int main(int argc, char *argv[])
     filter->root = (QQuickItem*)root;
     qDebug() << "Root";
     Lcd* lcd = (Lcd*)root->findChild<QObject*>("lcd");
+    filter->setLcd(lcd);
 
     qDebug() << "Lcd found " << lcd;
     lcd->start(emu);

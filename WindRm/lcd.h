@@ -5,6 +5,7 @@
 #include <QElapsedTimer>
 #include "../WindCore/emubase.h"
 
+//#define FRAME_DEBUG
 class Lcd : public QQuickPaintedItem {
     Q_OBJECT
  
@@ -20,6 +21,8 @@ public:
     Q_INVOKABLE void digitizerDown(QPointF pos);
     Q_INVOKABLE void digitizerUp(QPointF pos);
     Q_INVOKABLE void digitizerPos(QPointF pos);
+    Q_INVOKABLE void keyPressEvent(QKeyEvent* event);
+    Q_INVOKABLE void keyReleaseEvent(QKeyEvent* event);
 
 
 public slots:
@@ -30,7 +33,11 @@ private:
 
 private:
 	QElapsedTimer elapsedTimer;
+#ifdef FRAME_DEBUG
+    QElapsedTimer frameTimer;
+#endif
 	EmuBase *emu;
     QTimer *timer;
+    int frame;
 };
 #endif

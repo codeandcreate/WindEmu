@@ -4,6 +4,7 @@
 #include <time.h>
 #include "common.h"
 
+#define SPEED_HACKS
 
 namespace CLPS7111 {
 Emulator::Emulator() : EmuBase(false), pcCardController(this) {
@@ -337,6 +338,7 @@ void Emulator::executeUntil(int64_t cycles) {
 			passedCycles += tick();
 
 			uint32_t new_pc = getGPR(15) - 0xC;
+			#ifndef SPEED_HACKS
 			if (_breakpoints.find(new_pc) != _breakpoints.end()) {
 				log("⚠️ Breakpoint triggered at %08x!", new_pc);
 				return;
@@ -346,6 +348,7 @@ void Emulator::executeUntil(int64_t cycles) {
 				logPcHistory();
 				return;
 			}
+			#endif
 		}
 	}
 }

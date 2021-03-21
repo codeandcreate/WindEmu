@@ -20,10 +20,12 @@ QPointF swap(QPointF pointF){
 }
 
 QPointF transpose(QPointF pointF){
+    //qDebug() << "transpose " << pointF;
     pointF = swap(pointF);
     // Handle scaling from wacom to screensize
     pointF.setX(pointF.x() * WACOM_X_SCALAR);
     pointF.setY((DISPLAYWIDTH - pointF.y()) * WACOM_Y_SCALAR);
+    //qDebug() << "-transpose " << pointF;
     return pointF;
 }
 QPointF globalPos(QQuickItem* obj){
@@ -109,6 +111,18 @@ bool EventFilter::eventFilter(QObject* obj, QEvent* ev){
     auto type = ev->type();
     bool filtered = QObject::eventFilter(obj, ev);
     if(!filtered){
+        if (type == QEvent::KeyPress) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+            if (lcd) {
+                lcd->keyPressEvent(keyEvent);
+            }
+        }
+        if (type == QEvent::KeyRelease) {
+            QKeyEvent* keyEvent = static_cast<QKeyEvent*>(ev);
+            if (lcd) {
+                lcd->keyReleaseEvent(keyEvent);
+            }
+        }
         if(type == QEvent::TabletPress){
 #ifdef DEBUG_EVENTS
             qDebug() << ev;
