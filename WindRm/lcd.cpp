@@ -11,6 +11,10 @@
 #include "clps7111.h"
 
 #define SCALE_F 2
+#define SCREEN_HEIGHT 1404
+#define SCREEN_WIDTH 1872
+#define ORIGIN_X (((SCREEN_WIDTH-1391)/2)/* + 91*/)
+#define ORIGIN_Y (((SCREEN_HEIGHT-611)/2)/* + 12*/)
 
 Lcd::Lcd(QQuickItem *parent) {
 
@@ -115,17 +119,34 @@ void Lcd::menuButtonReleased() {
 }
 
 void Lcd::digitizerDown(QPointF pos) {
-    qDebug() << "down:" << (int32_t)(pos.x()/SCALE_F) << "," << (int32_t)(pos.y()/SCALE_F);
-    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), true);
+    // We rotate the display 90 degrees so x and y get flipped.
+    int32_t px = (pos.y() - ORIGIN_X) / SCALE_F;
+    int32_t py = ((SCREEN_HEIGHT - pos.x()) - ORIGIN_Y) / SCALE_F;
+
+    emu->updateTouchInput(px, py, true);
 }
 
 void Lcd::digitizerUp(QPointF pos) {
-    qDebug() << "up:" << (int32_t)pos.x() << "," << (int32_t)pos.y();
-    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), false);
+    // We rotate the display 90 degrees so x and y get flipped.
+    int32_t px = (pos.y() - ORIGIN_X) / SCALE_F;
+    int32_t py = ((SCREEN_HEIGHT - pos.x()) - ORIGIN_Y) / SCALE_F;
+
+    emu->updateTouchInput(px, py, false);
 }
 
 void Lcd::digitizerPos(QPointF pos) {
+    digitizerDown(pos);
+}
+
+void Lcd::fingerPos(QPointF pos) {
+    fingerDown(pos);
+}
+
+void Lcd::fingerDown(QPointF pos) {
     emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), true);
+}
+void Lcd::fingerUp(QPointF pos) {
+    emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), false);
 }
 
 void Lcd::execPaintTimer() {

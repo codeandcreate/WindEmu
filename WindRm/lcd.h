@@ -58,6 +58,11 @@ public:
     Q_INVOKABLE void digitizerDown(QPointF pos);
     Q_INVOKABLE void digitizerUp(QPointF pos);
     Q_INVOKABLE void digitizerPos(QPointF pos);
+    
+    Q_INVOKABLE void fingerDown(QPointF pos);
+    Q_INVOKABLE void fingerUp(QPointF pos);
+    Q_INVOKABLE void fingerPos(QPointF pos);
+
     Q_INVOKABLE void keyPressEvent(QKeyEvent* event);
     Q_INVOKABLE void keyReleaseEvent(QKeyEvent* event);
 

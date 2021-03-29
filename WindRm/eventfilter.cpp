@@ -11,7 +11,7 @@
 #define DISPLAYHEIGHT 1872.0
 #define WACOM_X_SCALAR (float(DISPLAYWIDTH) / float(DISPLAYHEIGHT))
 #define WACOM_Y_SCALAR (float(DISPLAYHEIGHT) / float(DISPLAYWIDTH))
-//#define DEBUG_EVENTS 1
+#define DEBUG_EVENTS 1
 
 EventFilter::EventFilter(QObject *parent) : QObject(parent), root(nullptr) {}
 
@@ -86,7 +86,9 @@ int parentCount(QQuickItem* obj){
 void postEvent(QEvent::Type type, QEvent* ev, QQuickItem* root){
     auto mouseEvent = toMouseEvent(type, ev);
     auto pos = mouseEvent->globalPos();
-    qDebug() << "mouse " << pos;
+    qDebug() << "mouse " << pos << ":" << mouseEvent;
+    //lcd->digitizerDown(pos);
+
     for(auto postWidget : widgetsAt(root, pos)){
         if(parentCount((QQuickItem*)postWidget)){
 #ifdef DEBUG_EVENTS
@@ -125,36 +127,18 @@ bool EventFilter::eventFilter(QObject* obj, QEvent* ev){
             }
         }
         if(type == QEvent::TabletPress){
-#ifdef DEBUG_EVENTS
-            qDebug() << ev;
-#endif
-            postEvent(QMouseEvent::MouseButtonPress, ev, root);
-        }else if(type == QEvent::TabletRelease){
-#ifdef DEBUG_EVENTS
-            qDebug() << ev;
-#endif
-            postEvent(QMouseEvent::MouseButtonRelease, ev, root);
-        }else if(type == QEvent::TabletMove){
-#ifdef DEBUG_EVENTS
-            qDebug() << ev;
-#endif
-            postEvent(QMouseEvent::MouseMove, ev, root);
+            auto mouseEvent = toMouseEvent(type, ev);
+            auto pos = mouseEvent->globalPos();
+            lcd->digitizerDown(pos);
+        } else if(type == QEvent::TabletRelease){
+            auto mouseEvent = toMouseEvent(type, ev);
+            auto pos = mouseEvent->globalPos();
+            lcd->digitizerUp(pos);
+        } else if(type == QEvent::TabletMove){
+            auto mouseEvent = toMouseEvent(type, ev);
+            auto pos = mouseEvent->globalPos();
+            lcd->digitizerPos(pos);
         }
-#ifdef DEBUG_EVENTS
-        else if(
-            type == QEvent::MouseMove
-            || type == QEvent::MouseButtonPress
-            || type == QEvent::MouseButtonRelease
-        ){
-            for(auto widget : widgetsAt(root, ((QMouseEvent*)ev)->globalPos())){
-                if(parentCount((QQuickItem*)widget)){
-                    qDebug() << "postWidget: " << widget;
-                }
-            }
-            qDebug() << obj;
-            qDebug() << ev;
-        }
-#endif
     }
     return filtered;
 }

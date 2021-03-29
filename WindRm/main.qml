@@ -23,15 +23,15 @@ Window {
             anchors.fill: parent;
             onPositionChanged: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                lcd.digitizerPos(positionInDigitizer);
+                lcd.fingerPos(positionInDigitizer);
             }
             onPressed: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                lcd.digitizerDown(positionInDigitizer);
+                lcd.fingerDown(positionInDigitizer);
             }
             onReleased: {
                 var positionInDigitizer = mapToItem(digitizer, mouse.x, mouse.y);
-                lcd.digitizerUp(positionInDigitizer);
+                lcd.fingerUp(positionInDigitizer);
             }
         }
 
