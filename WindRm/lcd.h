@@ -52,8 +52,6 @@ public:
     void paint(QPainter *painter) override;
     void start(EmuBase* emu);
 
-    Q_INVOKABLE void menuButtonPressed();
-    Q_INVOKABLE void menuButtonReleased();
     Q_INVOKABLE void saveButtonPressed();
     Q_INVOKABLE void digitizerDown(QPointF pos);
     Q_INVOKABLE void digitizerUp(QPointF pos);
@@ -70,8 +68,6 @@ public:
 public slots:
     void execTimer();
     void execPaintTimer();
-    void execThreadStarted();
-    void paintThreadStarted();
 
 private:
     void dumpDisassembly();
@@ -82,7 +78,6 @@ private:
     QElapsedTimer frameTimer;
 #endif
 	EmuBase *emu;
-    QTimer *timer;
     QTimer *paintTimer;
     int frame;
     QThread* emuThread;

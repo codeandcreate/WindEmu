@@ -6,6 +6,7 @@
 #include<QPainter>
 #include<QFile>
 #include <QBitmap>
+#include <QCoreApplication>
 
 #include "../WindCore/decoder.h"
 #include "clps7111.h"
@@ -44,15 +45,6 @@ void Lcd::start(EmuBase* emu) {
 
     emuThread->start();
 }
-
-void Lcd::paintThreadStarted() {
-//
-}
-
-void Lcd::execThreadStarted() {
-//
-}
-
 
 void Lcd::paint(QPainter *painter) {
     #ifdef FRAME_DEBUG
@@ -100,22 +92,15 @@ void Lcd::dumpDisassembly() {
 }
 
 void Lcd::saveButtonPressed() {
-    timer->stop();
+    emuThread->terminate();
+    emuThread->wait();
     qDebug() << "Saving state to psion.out";
     QFile f("psion.out");
 	f.open(QFile::WriteOnly);
     emu->saveState(&f);
 	f.close();
     qDebug() << "State written.";
-
-}
-
-void Lcd::menuButtonPressed() {
-    qDebug() << "menuPressed " << emu->currentCycles();
-    emu->setKeyboardKey(EStdKeyMenu, true);
-}
-void Lcd::menuButtonReleased() {
-    emu->setKeyboardKey(EStdKeyMenu, false);
+    QCoreApplication::quit();
 }
 
 void Lcd::digitizerDown(QPointF pos) {

@@ -11,7 +11,6 @@
 #define DISPLAYHEIGHT 1872.0
 #define WACOM_X_SCALAR (float(DISPLAYWIDTH) / float(DISPLAYHEIGHT))
 #define WACOM_Y_SCALAR (float(DISPLAYHEIGHT) / float(DISPLAYWIDTH))
-#define DEBUG_EVENTS 1
 
 EventFilter::EventFilter(QObject *parent) : QObject(parent), root(nullptr) {}
 
@@ -20,12 +19,10 @@ QPointF swap(QPointF pointF){
 }
 
 QPointF transpose(QPointF pointF){
-    //qDebug() << "transpose " << pointF;
     pointF = swap(pointF);
     // Handle scaling from wacom to screensize
     pointF.setX(pointF.x() * WACOM_X_SCALAR);
     pointF.setY((DISPLAYWIDTH - pointF.y()) * WACOM_Y_SCALAR);
-    //qDebug() << "-transpose " << pointF;
     return pointF;
 }
 QPointF globalPos(QQuickItem* obj){
@@ -69,7 +66,7 @@ bool EventFilter::eventFilter(QObject* obj, QEvent* ev){
                 lcd->keyReleaseEvent(keyEvent);
             }
         }
-        if(type == QEvent::TabletPress){
+        if (type == QEvent::TabletPress){
             auto mouseEvent = toMouseEvent(type, ev);
             auto pos = mouseEvent->globalPos();
             lcd->digitizerDown(pos);
