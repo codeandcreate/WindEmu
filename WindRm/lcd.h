@@ -3,9 +3,46 @@
 
 #include <QQuickPaintedItem>
 #include <QElapsedTimer>
+#include <QThread>
 #include "../WindCore/emubase.h"
 
-//#define FRAME_DEBUG
+// #define FRAME_DEBUG
+#define TICKS_PER_SECOND 64
+#define DRIFT_MILLIS_ADJUST_PER_TICK 10
+#define NANO_PER_MILLI 1000000
+#define SECOND_IN_NANOS 1000000000
+
+class LcdWorkerThread : public QThread {
+    Q_OBJECT
+public:
+    LcdWorkerThread(EmuBase* emuBase) : emu(emuBase) {}
+    void run() override {
+        QElapsedTimer t;
+        int driftMs = 0;
+        for (;;) {
+            t.start();
+            emu->executeUntil(emu->currentCycles() + (emu->getClockSpeed() / TICKS_PER_SECOND));
+            int sleepNs = (SECOND_IN_NANOS/TICKS_PER_SECOND) - t.nsecsElapsed();
+            if (driftMs > DRIFT_MILLIS_ADJUST_PER_TICK && sleepNs > DRIFT_MILLIS_ADJUST_PER_TICK * NANO_PER_MILLI) {
+                sleepNs -= DRIFT_MILLIS_ADJUST_PER_TICK * NANO_PER_MILLI;
+                driftMs = driftMs - DRIFT_MILLIS_ADJUST_PER_TICK;
+            }
+            if (sleepNs > 0) {
+                struct timespec ts = { 0, sleepNs };
+                nanosleep(&ts, NULL);
+            } else {
+                // sleepNs always negative here, adding to drift.
+                driftMs -= sleepNs / NANO_PER_MILLI;
+                #ifdef FRAME_DEBUG
+                qDebug() << "Drift is now: " << driftMs << "ms (" << t.nsecsElapsed() << ") last exec.";
+                #endif
+            }
+        }
+    }
+private:
+    EmuBase* emu;
+};
+
 class Lcd : public QQuickPaintedItem {
     Q_OBJECT
  
@@ -27,6 +64,9 @@ public:
 
 public slots:
     void execTimer();
+    void execPaintTimer();
+    void execThreadStarted();
+    void paintThreadStarted();
 
 private:
     void dumpDisassembly();
@@ -38,6 +78,12 @@ private:
 #endif
 	EmuBase *emu;
     QTimer *timer;
+    QTimer *paintTimer;
     int frame;
+    QThread* emuThread;
+    QThread* lcdThread;
+    uint8_t* lines[1024];
+	QImage* img;
+
 };
 #endif

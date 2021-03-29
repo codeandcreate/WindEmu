@@ -11,6 +11,7 @@ Window {
     height: 1872;
 
     Rectangle {
+        rotation: 90;
         id: digitizer;
         width:1391;
         height:611;
@@ -50,29 +51,31 @@ Window {
 
 
     }
-    Keyboard {
-            id: keyboard;
-            visible: true;
-            function onChar(ch) {
-                console.log(ch);
-                lcd.keyPressEvent(ch.toUpperCase());
-            }
-            function onCharRelease(ch) {
-                console.log("release:" + ch);
-                lcd.keyReleaseEvent(ch.toUpperCase());
-            }
-            anchors.bottom: parent.bottom
-    }
+
+    // Keyboard {
+    //         id: keyboard;
+    //         visible: true;
+    //         function onChar(ch) {
+    //             console.log(ch);
+    //             lcd.keyPressEvent(ch.toUpperCase());
+    //         }
+    //         function onCharRelease(ch) {
+    //             console.log("release:" + ch);
+    //             lcd.keyReleaseEvent(ch.toUpperCase());
+    //         }
+    //         anchors.bottom: parent.bottom
+    // }
 
     Rectangle {
         id: bmenubox;
+        rotation: 90;
         width: 80
         height: 80
         color: "white"
         border.color: "black"
         border.width: 3
         radius: 10
-        anchors.right: parent.right;
+        anchors.left: parent.left;
         anchors.bottom: parent.bottom;
 
         Text {

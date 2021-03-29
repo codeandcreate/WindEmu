@@ -19,19 +19,36 @@ Lcd::Lcd(QQuickItem *parent) {
 void Lcd::start(EmuBase* emu) {
     this->emu = emu;
     qDebug() << "Lcd::start()";
+    img = new QImage(emu->getLCDWidth(), emu->getLCDHeight(), QImage::Format_Grayscale8);
+    for (int y = 0; y < img->height(); y++)
+        lines[y] = img->scanLine(y);
+            
     elapsedTimer.start();
 	emu->setLogger([&](const char *str) {
 		QString fullStr = QStringLiteral("[%1] %2").arg(elapsedTimer.elapsed()).arg(str);
 		qDebug() << fullStr;
 	});
 
-    timer = new QTimer(this);
-    timer->setInterval(1000/64);
+    emuThread = new LcdWorkerThread(this->emu);
+    
+    paintTimer = new QTimer(NULL);
+    paintTimer->setInterval(1000/4);
     qDebug() << "connecting Timer";
 
-    connect(timer, SIGNAL(timeout()), SLOT(execTimer()));
-    timer->start();
+    connect(paintTimer, SIGNAL(timeout()), SLOT(execPaintTimer()));
+    paintTimer->start();
+
+    emuThread->start();
 }
+
+void Lcd::paintThreadStarted() {
+//
+}
+
+void Lcd::execThreadStarted() {
+//
+}
+
 
 void Lcd::paint(QPainter *painter) {
     #ifdef FRAME_DEBUG
@@ -39,17 +56,13 @@ void Lcd::paint(QPainter *painter) {
     pt.start();
     #endif
 
-	uint8_t *lines[1024];
-	QImage img(emu->getLCDWidth(), emu->getLCDHeight(), QImage::Format_Grayscale8);
-	for (int y = 0; y < img.height(); y++)
-		lines[y] = img.scanLine(y);
 	emu->readLCDIntoBuffer(lines, false);
 
     QRectF target(0.0, 0.0, 640.0, 240.0);
     QRectF source(0.0, 0.0, 640.0, 240.0);
 
     painter->scale(2, 2);
-    painter->drawPixmap(target, QPixmap::fromImage(std::move(img)), source);
+    painter->drawPixmap(target, QPixmap::fromImage(*img), source);
 
 
     #ifdef FRAME_DEBUG
@@ -115,6 +128,10 @@ void Lcd::digitizerPos(QPointF pos) {
     emu->updateTouchInput((int32_t)(pos.x()/SCALE_F), (int32_t)(pos.y()/SCALE_F), true);
 }
 
+void Lcd::execPaintTimer() {
+    update();
+}
+
 void Lcd::execTimer() {
     #ifdef FRAME_DEBUG
     qDebug() << "Inter-exec time:" << frameTimer.elapsed() << "milliseconds";
@@ -128,18 +145,12 @@ void Lcd::execTimer() {
 		emu->executeUntil(emu->currentCycles() + (emu->getClockSpeed() / 64));
 
         frame++;
-        if (pt.nsecsElapsed() < 7000000) {
-          if (frame % 6 == 0) {
-            update();
-          }
-        }
-	}
-
     #ifdef FRAME_DEBUG
-    if (pt.nsecsElapsed() > 15625000) {
-        qDebug() << "Exec+draw took" << pt.nsecsElapsed() << "nanoseconds [should be < 15,625,000]";
-    }
+        if (pt.nsecsElapsed() > 15625000) {
+            qDebug() << "Exec+draw took" << pt.nsecsElapsed() << "nanoseconds [should be < 15,625,000]";
+        }
     #endif
+    }
 }
 
 static EpocKey resolveKey(int key, int vk) {

@@ -86,6 +86,7 @@ int parentCount(QQuickItem* obj){
 void postEvent(QEvent::Type type, QEvent* ev, QQuickItem* root){
     auto mouseEvent = toMouseEvent(type, ev);
     auto pos = mouseEvent->globalPos();
+    qDebug() << "mouse " << pos;
     for(auto postWidget : widgetsAt(root, pos)){
         if(parentCount((QQuickItem*)postWidget)){
 #ifdef DEBUG_EVENTS
