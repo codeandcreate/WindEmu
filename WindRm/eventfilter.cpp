@@ -51,64 +51,7 @@ QMouseEvent* toMouseEvent(QEvent::Type type, QEvent* ev){
         tabletEvent->modifiers()
     );
 }
-bool isAt(QQuickItem* item, QPointF pos){
-    auto itemPos = globalPos(item);
-    auto otherItemPos = QPointF(itemPos.x() + item->width(), itemPos.y() + item->height());
-    return pos.x() >= itemPos.x() && pos.x() <= otherItemPos.x() && pos.y() >= itemPos.y() && pos.y() <= otherItemPos.y();
-}
-QList<QObject*> widgetsAt(QQuickItem* root, QPointF pos){
-    QList<QObject*> result;
-    auto children = root->findChildren<QQuickItem*>();
-    for(auto child : children){
-        if(isAt(child, pos)){
-            if(child->isVisible() && child->isEnabled() && child->acceptedMouseButtons() & Qt::LeftButton){
-                if(!result.contains(child)){
-                    result.append((QObject*)child);
-                    for(auto item : widgetsAt(child, pos)){
-                        if(!result.contains(item)){
-                            result.append(item);
-                        }
-                    }
-                }
-            }
-        }
-    }
-    return result;
-}
-int parentCount(QQuickItem* obj){
-    int count = 0;
-    while(obj->parentItem()){
-        count++;
-        obj = obj->parentItem();
-    }
-    return count;
-}
-void postEvent(QEvent::Type type, QEvent* ev, QQuickItem* root){
-    auto mouseEvent = toMouseEvent(type, ev);
-    auto pos = mouseEvent->globalPos();
-    qDebug() << "mouse " << pos << ":" << mouseEvent;
-    //lcd->digitizerDown(pos);
 
-    for(auto postWidget : widgetsAt(root, pos)){
-        if(parentCount((QQuickItem*)postWidget)){
-#ifdef DEBUG_EVENTS
-            qDebug() << "postWidget: " << postWidget;
-#endif
-            auto event = new QMouseEvent(
-                mouseEvent->type(), mouseEvent->localPos(), mouseEvent->windowPos(),
-                mouseEvent->screenPos(), mouseEvent->button(), mouseEvent->buttons(),
-                mouseEvent->modifiers()
-            );
-            auto widgetPos = globalPos((QQuickItem*)postWidget);
-            auto localPos = event->localPos();
-            localPos.setX(pos.x() - widgetPos.x());
-            localPos.setY((pos.y()) - widgetPos.y());
-            event->setLocalPos(localPos);
-            QGuiApplication::postEvent(postWidget, event);
-        }
-    }
-    delete mouseEvent;
-}
 
 bool EventFilter::eventFilter(QObject* obj, QEvent* ev){
     auto type = ev->type();
