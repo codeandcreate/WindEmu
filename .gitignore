@@ -1,7 +1,16 @@
 *.pro.user*
+*.o
+*.a
+*.out
+*.bin
+qrc_qml.cpp
+.qmake.stash
+Makefile
 WindWasm/WindEmu.data
 WindWasm/WindEmu.html
 WindWasm/WindEmu.js
 WindWasm/WindEmu.wasm
 WindWasm/rom
 WindWasm/obj
+WindEmu/WindEmu
+WindQt/WindQt

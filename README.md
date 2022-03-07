@@ -2,6 +2,8 @@ WindEmu is an attempt to emulate various Psion PDAs.
 
 - Platform-independent core emulation library written in C/C++
 - Qt5 front-end (currently quite barebones...)
+- Qt5/QML front-end for Remarkable 2 (WindRm)
+- Qt5/QML front-end for end user on desktop linux (WindEmu)
 - Very experimental
 - Basic support for multiple devices
 
@@ -9,6 +11,7 @@ Psion 5mx (EPOC R5) features:
 
 - ✅ LCD: implemented
 - ✅ Keyboard: implemented
+- ❌ Keyboard: international support, special chars
 - ✅ Touch panel: implemented
 - ❌ Audio: not implemented
 - ❌ Serial/UART support: stubbed out
@@ -16,11 +19,13 @@ Psion 5mx (EPOC R5) features:
 - ✅ RTC: implemented
 - ❌ RTC alarm: not implemented
 - ❌ Standby mode: not implemented
+- ✅ Save state (only WindEmu)
 
 Oregon Scientific Osaris (EPOC R4) features:
 
 - ✅ LCD: implemented
 - ✅ Keyboard: implemented
+- ❌ Keyboard: international support, special chars
 - ✅ Touch panel: implemented
 - ❌ Audio: not implemented
 - ❌ Serial/UART support: stubbed out
@@ -28,10 +33,10 @@ Oregon Scientific Osaris (EPOC R4) features:
 - ✅ RTC: implemented (needs testing)
 - ❌ RTC alarm: not implemented
 - ❌ Standby mode: not implemented
+- ✅ Save state (only WindEmu)
 
 Known issues:
 
-- State is not saved (just like a real Psion :p)
 - EPOC misbehaves massively with memory banks larger than 0x800000 (may be an OS design flaw? need to confirm)
 
 Copyright
@@ -61,5 +66,6 @@ The datasheet for the CL-PS7111 SoC used in the Osaris is available here: https:
 The datasheet for the CL-PS6700 PCMCIA controller used in the Osaris is available here: https://pdf1.alldatasheet.com/datasheet-pdf/view/104907/CIRRUS/CL-PS6700.html
 
 
+Original Repository: https://github.com/Treeki/WindEmu
 
-
+Remarkable 2 Repository: https://github.com/dps/WindEmu

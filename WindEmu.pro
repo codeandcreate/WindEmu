@@ -2,4 +2,5 @@ TEMPLATE = subdirs
 
 SUBDIRS += \
     WindQt \
-    WindCore
+    WindCore \
+    WindEmu
